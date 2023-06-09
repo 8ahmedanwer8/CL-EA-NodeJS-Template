@@ -18,6 +18,30 @@ const customParams = {
   endpoint: false,
 };
 
+const sortArrayByYearDescending = (data) => {
+  let dataArray = Object.keys(data).map((key) => {
+    let [year, month] = key.split("-").map(Number);
+    month -= 1;
+    return {
+      date: new Date(year, month),
+      ...data[key],
+      dateString: key,
+    };
+  });
+
+  dataArray.sort((a, b) => b.date - a.date);
+
+  dataArray = dataArray.slice(0, 6);
+
+  const output = dataArray.map(({ dateString, grossNewSales, unitName }) => ({
+    date: dateString,
+    grossNewSales,
+    unitName,
+  }));
+
+  return output;
+};
+
 const createRequest = (input, callback) => {
   // The Validator helps you validate the Chainlink request data
   const validator = new Validator(callback, input, customParams);
@@ -67,18 +91,20 @@ const createRequest = (input, callback) => {
         for (const d of data) {
           const { grossNewSales, weekEndingDate, unitId } = d;
           const monthIdx = new Date(weekEndingDate).getMonth();
-          if (!massagedData[monthIdx]) {
-            massagedData[monthIdx] = {
+          const year = new Date(weekEndingDate).getFullYear();
+          const key = `${year}-${monthIdx + 1}`;
+          if (!massagedData[key]) {
+            massagedData[key] = {
               grossNewSales: 0,
               unitName: unitsOfMeasure[unitId],
             };
           }
-          massagedData[monthIdx].grossNewSales += grossNewSales;
+          massagedData[key].grossNewSales += grossNewSales;
         }
         joinedList.push({
           commodityCode,
           commodityName: name,
-          data: massagedData,
+          data: sortArrayByYearDescending(massagedData),
         });
       });
 
