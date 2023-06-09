@@ -31,7 +31,7 @@ const sortArrayByYearDescending = (data) => {
 
   dataArray.sort((a, b) => b.date - a.date);
 
-  dataArray = dataArray.slice(0, 6);
+  dataArray = dataArray.slice(1, 7);
 
   const output = dataArray.map(({ dateString, grossNewSales, unitName }) => ({
     date: dateString,
@@ -40,6 +40,28 @@ const sortArrayByYearDescending = (data) => {
   }));
 
   return output;
+};
+
+const cumulativeChange = (monthlyData) => {
+  const lastMonthSales = monthlyData[0].grossNewSales;
+  const monthBeforeLastSales = monthlyData[1].grossNewSales;
+
+  if (lastMonthSales === 0 && monthBeforeLastSales !== 0) {
+    return -100;
+  }
+
+  if (lastMonthSales === 0 && monthBeforeLastSales !== 0) {
+    return 100;
+  }
+
+  if (lastMonthSales === 0 && monthBeforeLastSales === 0) {
+    return 0;
+  }
+
+  const chagePercentage =
+    ((lastMonthSales - monthBeforeLastSales) / lastMonthSales) * 100;
+
+  return chagePercentage;
 };
 
 const createRequest = (input, callback) => {
@@ -101,10 +123,12 @@ const createRequest = (input, callback) => {
           }
           massagedData[key].grossNewSales += grossNewSales;
         }
+        const sortedByYear = sortArrayByYearDescending(massagedData);
         joinedList.push({
           commodityCode,
           commodityName: name,
-          data: sortArrayByYearDescending(massagedData),
+          data: sortedByYear,
+          cumulativeChange: cumulativeChange(sortedByYear),
         });
       });
 
