@@ -8,11 +8,11 @@ describe("createRequest", () => {
     const requests = [
       {
         name: "id not supplied",
-        testData: { data: { code: "101", year: "2023" } },
+        testData: { data: { year: "2023" } },
       },
       {
         name: "code",
-        testData: { id: jobID, data: { code: "101", year: "2023" } },
+        testData: { id: jobID, data: { year: "2023" } },
       },
     ];
 
@@ -35,20 +35,12 @@ describe("createRequest", () => {
       { name: "empty body", testData: {} },
       { name: "empty data", testData: { data: {} } },
       {
-        name: "base not supplied",
-        testData: { id: jobID, data: { year: "2023" } },
-      },
-      {
-        name: "quote not supplied",
-        testData: { id: jobID, data: { code: "101" } },
-      },
-      {
-        name: "bad code",
-        testData: { id: jobID, data: { code: "badcode", year: "2023" } },
+        name: "year not supplied",
+        testData: { id: jobID, data: {} },
       },
       {
         name: "bad year",
-        testData: { id: jobID, data: { code: "101", year: "badyear" } },
+        testData: { id: jobID, data: { year: "badyear" } },
       },
     ];
 

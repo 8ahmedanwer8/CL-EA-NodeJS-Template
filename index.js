@@ -62,14 +62,24 @@ const createRequest = (input, callback) => {
         const { data } = res;
         const massagedData = {};
         const { commodityCode } = data[0];
+        const name = commodityCodes[commodityCode].commodityName;
+
         for (const d of data) {
-          const { commodityCode, grossNewSales, weekEndingDate } = d;
-          if (!massagedData[weekEndingDate]) {
-            massagedData[weekEndingDate] = { grossNewSales: 0, commodityCode };
+          const { grossNewSales, weekEndingDate, unitId } = d;
+          const monthIdx = new Date(weekEndingDate).getMonth();
+          if (!massagedData[monthIdx]) {
+            massagedData[monthIdx] = {
+              grossNewSales: 0,
+              unitName: unitsOfMeasure[unitId],
+            };
           }
-          massagedData[weekEndingDate].grossNewSales += grossNewSales;
+          massagedData[monthIdx].grossNewSales += grossNewSales;
         }
-        joinedList.push({ commodityCode, data: massagedData });
+        joinedList.push({
+          commodityCode,
+          commodityName: name,
+          data: massagedData,
+        });
       });
 
       const resp = {
