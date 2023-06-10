@@ -43,25 +43,40 @@ const sortArrayByYearDescending = (data) => {
 };
 
 const cumulativeChange = (monthlyData) => {
-  const lastMonthSales = monthlyData[0].grossNewSales;
-  const monthBeforeLastSales = monthlyData[1].grossNewSales;
+  const data = monthlyData;
+  // Reverse the data array to process in reverse time order
+  const reversedData = data.reverse();
 
-  if (lastMonthSales === 0 && monthBeforeLastSales !== 0) {
-    return -100;
-  }
+  // Calculate the percentage change between each data point
+  const changes = reversedData.map((item, index) => {
+    if (index === 0) {
+      return 0.0; // The first data point doesn't have a change
+    }
+    var previousValue = reversedData[index - 1].grossNewSales;
+    const currentValue = item.grossNewSales;
+    if (previousValue === 0) {
+      previousValue = 1; // Handle divide by zero case
+    }
+    return (currentValue - previousValue) / previousValue;
+  });
 
-  if (lastMonthSales === 0 && monthBeforeLastSales !== 0) {
-    return 100;
-  }
+  // Normalize the changes to a range of 0.0 to 1.0
+  const minValue = Math.min(...changes);
+  const maxValue = Math.max(...changes);
+  const normalizedChanges = changes.map(
+    (change) => (change - minValue) / (maxValue - minValue)
+  );
 
-  if (lastMonthSales === 0 && monthBeforeLastSales === 0) {
-    return 0;
-  }
+  // Sum up the normalized changes
+  const sum = normalizedChanges.reduce(
+    (accumulator, currentValue) => accumulator + currentValue,
+    0
+  );
 
-  const chagePercentage =
-    ((lastMonthSales - monthBeforeLastSales) / lastMonthSales) * 100;
+  // Calculate the average
+  const average = sum / normalizedChanges.length;
 
-  return chagePercentage;
+  return average;
 };
 
 const createRequest = (input, callback) => {
@@ -124,6 +139,7 @@ const createRequest = (input, callback) => {
           massagedData[key].grossNewSales += grossNewSales;
         }
         const sortedByYear = sortArrayByYearDescending(massagedData);
+        console.log(sortedByYear, "ahmed");
         joinedList.push({
           commodityCode,
           commodityName: name,
